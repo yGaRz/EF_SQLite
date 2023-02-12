@@ -8,23 +8,36 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace EF_SQLite 
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            //Скрипт для инициализации с нуля, ID будут сдвигаться по мере перезапуска/удалении
-            //UserRepository.ClearUsers();
-            //UserRepository.AddUser(new User { Name = "Кирилл", Email = "k@ya.ru", Role = "User" });
-            //UserRepository.AddUser(new User { Name = "Михаил", Email = "m@ya.ru", Role = "Manager" });
-            //UserRepository.AddUser(new User { Name = "Андрей", Email = "a@ya.ru", Role = "User" });
-            //PrintAllUser();
-            //UserRepository.ChangeNameUser(8, "Илья");
+            //Используем для удаления БД.
+            using (var db = new ApplicationContext())
+            {
+                db.Database.EnsureDeleted();
+            }
+            //Скрипт для инициализации
+            UserRepository.AddUser(new User { Name = "Кирилл", Email = "k@ya.ru", Role = "User" });
+            UserRepository.AddUser(new User { Name = "Михаил", Email = "m@ya.ru", Role = "Manager" });
+            UserRepository.AddUser(new User { Name = "Андрей", Email = "a@ya.ru", Role = "User" });
             PrintAllUser();
+            //Обновление пользователя
+            UserRepository.ChangeNameUser(2, "Илья");
+            PrintAllUser();
+            Console.WriteLine("--------------------------------");
+            BookRepository.ClearBooks();
+            BookRepository.AddBook(new Book { Year = 1984, Title = "1984", Autor = "Оурэлл", Genre = "Фантастика" });
+            BookRepository.AddBook(new Book { Year = 1995, Title = "Стихи", Autor = "Пушкин", Genre="Стихи" });
+            BookRepository.AddBook(new Book { Year = 2000, Title = "Му-му", Autor = "Тургенев", Genre="Проза" });
+            BookRepository.AddBook(new Book { Year = 2005, Title = "Рыцари 40 островов", Autor = "Лукъяненко",Genre="Фантастика" });
+            PrintAllBooks();
 
-
+            User? user1 = UserRepository.GetUser(1);
+            Book? book1 = BookRepository.GetBook(2);
+            UserRepository.UserGetBook(user1, book1);
         }
 
         public static void PrintAllUser()
@@ -40,15 +53,22 @@ namespace EF_SQLite
             else
                 Console.WriteLine("Connection fail.");
         }
+
+        public static void PrintAllBooks()
+        {
+            List<Book>? books = BookRepository.GetBooks();
+            if (books != null)
+            {
+                foreach (Book book in books)
+                {
+                    Console.WriteLine($"{book.Id} | {book.Autor} | {book.Title}| {book.Genre} | {book.Year}");
+                }
+            }
+            else
+                Console.WriteLine("Connection fail.");
+        }
     }
 }
-
-//TODO:Задание 25.3.5*
-//Для каждой из моделей в приложении создайте собственный класс-репозиторий (например, UserRepository и BookRepository),
-//в которых опишите следующие действия:
-//выбор объекта из БД по его идентификатору,
-//выбор всех объектов, добавление объекта в БД и его удаление из БД.
-//А также специфичные методы: обновление имени пользователя (по Id) и обновление года выпуска книги (по Id).
 
 //TODO: Задание 25.4.3*
 //Пришло время расширить проект и добавить в него некоторые новые части.

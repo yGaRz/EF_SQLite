@@ -15,33 +15,29 @@ namespace EF_SQLite
         {
             using (var db = new ApplicationContext())
             {
-                if (!db.Database.EnsureCreated())
-                {
-                    db.Users.Load();
-                    List<User> users = db.Users.ToList();
-                    return users.Where(user=>user.Id == Id).FirstOrDefault();
-                }
-                else
-                    return null;
+                db.Users.Load();
+                List<User> users = db.Users.ToList();
+                return users.Where(user => user.Id == Id).FirstOrDefault();
+
             }
         }
 
+        //Смена имени пользователя
         public static void ChangeNameUser(int Id, string Name)
         {
             using (var db = new ApplicationContext())
             {
-                if (!db.Database.EnsureCreated())
+
+                db.Users.Load();
+                List<User> users = db.Users.ToList();
+                User? user = users.FirstOrDefault(user => user.Id == Id);
+                if (user != null)
                 {
-                    db.Users.Load();
-                    List<User> users = db.Users.ToList();
-                    User? user = users.FirstOrDefault(user => user.Id == Id);
-                    if (user != null)
-                    {
-                        user.Name = Name;
-                        db.SaveChanges();
-                        Console.WriteLine("User updated.");
-                    }
+                    user.Name = Name;
+                    db.SaveChanges();
+                    Console.WriteLine("User updated.");
                 }
+
             }
         }
 
@@ -50,12 +46,11 @@ namespace EF_SQLite
         {
             using (var db = new ApplicationContext())
             {
-                if (!db.Database.EnsureCreated())
-                {
-                    db.Users.Add(user);
-                    db.SaveChanges();
-                }
+
+                db.Users.Add(user);
+                db.SaveChanges();
             }
+
         }
 
         //Получение списка пользователей.
@@ -63,14 +58,9 @@ namespace EF_SQLite
         {
             using (var db = new ApplicationContext())
             {
-                if (!db.Database.EnsureCreated())
-                {
-                    db.Users.Load();
-                    List<User> users = db.Users.ToList();
-                    return users;
-                }
-                else
-                    return null;
+                db.Users.Load();
+                List<User> users = db.Users.ToList();
+                return users;
             }
         }
 
@@ -78,10 +68,20 @@ namespace EF_SQLite
         {
             using (var db = new ApplicationContext())
             {
-                if (!db.Database.EnsureCreated())
+                var users = db.Users.ToList();
+                db.Users.RemoveRange(users);
+                db.SaveChanges();
+            }
+        }
+
+        public static void UserGetBook(User? user,Book? book)
+        {
+            if(book != null && user!=null)
+            {
+                using (var db = new ApplicationContext())
                 {
-                    var users = db.Users.ToList();
-                    db.Users.RemoveRange(users);
+                    user.Books.Add(book);
+                    db.Users.Update(user);
                     db.SaveChanges();
                 }
             }
